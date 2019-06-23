@@ -3,7 +3,8 @@
         ["env", {
             "target": {
                 "node": ">= 6.0"
-            }
+            },
+            "modules": "commonjs"
         }]
     ]
 }

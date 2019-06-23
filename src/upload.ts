@@ -14,27 +14,29 @@ const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
     const headers = Object.assign({}, headersConfig);
     headers["content-type"] = `image/${ext}`;
     config.headers = headers;
-    const req = https.request(config, (res: IncomingMessage) => {
-      // 图片上传成功
-      if (res.statusCode === 201) {
-        resolve({
-          upload: true,
-          location: res.headers.location
-        });
-      } else {
+    setTimeout(() => {
+      const req = https.request(config, (res: IncomingMessage) => {
+        // 图片上传成功
+        if (res.statusCode === 201) {
+          resolve({
+            upload: true,
+            location: res.headers.location
+          });
+        } else {
+          reject({
+            upload: false
+          })
+        }
+      });
+      const data = fs.readFileSync(filePath);
+      req.write(data);
+      req.end();
+      req.on("error", (err: any) => {
         reject({
           upload: false
-        })
-      }
-    });
-    const data = fs.readFileSync(filePath);
-    req.write(data);
-    req.end();
-    req.on("error", (err: any) => {
-      reject({
-        upload: false
+        });
       });
-    });
+    }, 100);
   });
 };
 export default upload;

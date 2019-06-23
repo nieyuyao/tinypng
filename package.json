@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc ./src/*.ts --outDir ./dist && babel ./bin -d ./bin",
-    "test": "cd ./test && node ../dist/index.js --outdir ../build"
+    "test": "cd ./test && node ../dist/index.js"
   },
   "keywords": [
     "tiny",

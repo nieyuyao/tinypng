@@ -11,6 +11,7 @@ const ctxPath = process.cwd();
 // 成功的个数， 失败的个数，详情
 let success: number = 0;
 let fail: number = 0;
+let total: number = 0;
 let files: Array<string>;
 let tasks: Array<Promise<any>>;
 const results: Result = {};
@@ -29,6 +30,7 @@ function getFiles(): void {
   files = fs.readdirSync(ctxPath, {
     withFileTypes: true
   });
+  total = files.length;
   console.log(`\u001b[32m共${files.length}个图片\u001b[0m`);
 }
 
@@ -64,6 +66,7 @@ function getTasks(): void {
         }
         fs.writeFileSync(`${outDir}/${filename}`, downloadResult.buffer);
         success++;
+        log(`tinying...${Math.floor((success / total) * 100)}%\n`);
       } catch (err) {
         fail++;
         // 上传失败
