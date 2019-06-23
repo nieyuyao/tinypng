@@ -13,10 +13,11 @@ npm i -g tinypng
 
 ### 使用方法
 ```
+// cd到某目录
 tinypng
 ```
 or
 ```
-// 指定输出到某目录
+// 指定输出到某目录 test为目录
 tinypng --outdir test
 ```
