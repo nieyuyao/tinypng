@@ -97,7 +97,7 @@ function getTasks(): void {
 async function tiny(): Promise<void> {
   try {
     await Promise.all(tasks);
-    console.log(`\u001b[32m\uD83D\uDE04 ${success}个 \uD83D\uDE30 \u001b[31m${fail}个\u001b[0m`);
+    console.log(`\u001b[32m\uD83D\uDE04 ${success}个 \uD83D\uDE30 \u001b[31m${total-success}个\u001b[0m`);
     for (const filename in results) {
       console.log(`\u001b[31m${filename} ${results[filename].errInfo}\u001b[0m`);
     }
