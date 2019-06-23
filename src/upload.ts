@@ -7,7 +7,12 @@ interface PromiseValue {
   upload: boolean;
   location?: string;
 }
-// 上传图片
+
+/**
+ * @description 
+ * @param  {String} filePath 图片路径
+ * @param {String} ext 图片后缀
+ */
 const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
   return new Promise((resolve, reject) => {
     const config = Object.assign({}, uploadConfig);

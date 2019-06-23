@@ -7,7 +7,11 @@ interface PromiseValue {
   buffer?: Buffer;
 }
 
-// 下载图片
+/**
+ * @description 下载图片
+ * @param {String} location 远端图片路径
+ * @param {String} filename 文件名
+ */
 const download = (
   location: string,
   filename: string

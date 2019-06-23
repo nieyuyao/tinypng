@@ -91,6 +91,9 @@ function getTasks(): void {
   });
 }
 
+/**
+ * @description 压缩图片
+ */
 async function tiny(): Promise<void> {
   try {
     await Promise.all(tasks);
@@ -108,6 +111,10 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
+
+/**
+ * @description 提示是否要压缩
+ */
 function question(): void {
   rl.question('\u001b[1m\u001b[31m确定要压缩该文件夹下的图片?\u001b[0m(\u001b[32myes/no\u001b[0m)', (awnser: string) => {
     if (awnser === '' || awnser === 'yes') {
