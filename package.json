@@ -2,7 +2,7 @@
   "name": "tinypng",
   "version": "1.0.0",
   "description": "tiny image from tinypng.com",
-  "main": "index.js",
+  "main": "bin/bindex.js",
   "scripts": {
     "build": "tsc ./src/*.ts --outDir ./dist && babel ./bin -d ./bin",
     "test": "cd ./test && node ../dist/index.js"
