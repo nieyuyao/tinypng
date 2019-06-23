@@ -39,4 +39,5 @@ export const downloadConfig: ReqConfig = {
   rejectUnauthorized: false
 };
 
+export const imgReg: RegExp = /.*\.(png|jpe?g)$/;
 export const extReg: RegExp = /\.(png|jpe?g)$/;

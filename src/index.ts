@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import upload from "./upload";
 import download from "./download";
-import { extReg, Result, Errors } from "./config";
+import { extReg, Result, Errors, imgReg } from "./config";
 const fs = require("fs");
 const path = require("path");
 const log = require('single-line-log').stdout;
@@ -27,8 +27,11 @@ if (argvs[2] && argvs[2] === "--outdir") {
  *@description 读取目录下的文件
  */
 function getFiles(): void {
-  files = fs.readdirSync(ctxPath, {
+  const _files = fs.readdirSync(ctxPath, {
     withFileTypes: true
+  });
+  files = _files.filter((file: string) => {
+    return imgReg.test(file);
   });
   total = files.length;
   console.log(`\u001b[32m共${files.length}个图片\u001b[0m`);
