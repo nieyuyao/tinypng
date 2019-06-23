@@ -4,7 +4,7 @@
   "description": "tiny image from tinypng.com",
   "main": "index.js",
   "scripts": {
-    "build": "tsc ./src/*.ts --outDir ./dist && babel ./dist -d ./dist",
+    "build": "tsc ./src/*.ts --outDir ./dist && babel ./bin -d ./bin",
     "test": "cd ./test && node ../dist/index.js --outdir ../build"
   },
   "keywords": [
