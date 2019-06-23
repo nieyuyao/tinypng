@@ -86,10 +86,8 @@ async function tiny(): Promise<void> {
     for (const filename in results) {
       console.log(`\u001b[31m${filename} ${results[filename].errInfo}\u001b[0m`);
     }
-    process.exit(1);
   }
   catch(err) {
-    process.exit(1);
   }
 }
 tiny();
