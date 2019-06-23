@@ -1,0 +1,25 @@
+{
+  "name": "tinypng",
+  "version": "1.0.0",
+  "description": "tiny image from tinypng.com",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc ./src/*.ts --outDir ./dist && babel ./dist -d ./dist",
+    "test": "cd ./test && node ../dist/index.js --outdir ../build"
+  },
+  "keywords": [
+    "tiny",
+    "image"
+  ],
+  "author": "nie.yuyao",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "single-line-log": "^1.1.2"
+  }
+}

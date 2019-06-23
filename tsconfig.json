@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+		"allowJs": true,
+		"target": "es5",
+		"strict": true,
+		"module": "es2015",
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"lib": ["es2015", "es2016"]
+	},
+	"include": ["./src/**/*"]
+}
+  
