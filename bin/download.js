@@ -3,7 +3,11 @@
 exports.__esModule = true;
 var config_1 = require("./config");
 var https = require("https");
-// 下载图片
+/**
+ * @description 下载图片
+ * @param {String} location 远端图片路径
+ * @param {String} filename 文件名
+ */
 var download = function download(location, filename) {
     return new Promise(function (resolve, reject) {
         var buffer = Buffer.alloc(0);

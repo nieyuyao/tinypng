@@ -21,4 +21,5 @@ exports.downloadConfig = {
     method: "GET",
     rejectUnauthorized: false
 };
+exports.imgReg = /.*\.(png|jpe?g)$/;
 exports.extReg = /\.(png|jpe?g)$/;

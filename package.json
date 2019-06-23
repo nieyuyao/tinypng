@@ -1,11 +1,11 @@
 {
   "name": "tinypngs",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "tiny image from tinypng.com",
   "main": "bin/bindex.js",
   "scripts": {
-    "build": "tsc ./src/*.ts --outDir ./dist && babel ./bin -d ./bin",
-    "test": "cd ./test && node ../dist/index.js"
+    "build": "tsc ./src/*.ts --outDir ./bin && babel ./bin -d ./bin",
+    "test": "cd ./test && node ../bin/index.js --outdir ../dist"
   },
   "keywords": [
     "tiny",
