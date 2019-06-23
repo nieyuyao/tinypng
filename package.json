@@ -1,5 +1,5 @@
 {
-  "name": "tinypng",
+  "name": "tinypngs",
   "version": "1.0.0",
   "description": "tiny image from tinypng.com",
   "main": "bin/bindex.js",
