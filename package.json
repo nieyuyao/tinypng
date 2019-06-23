@@ -11,6 +11,9 @@
     "tiny",
     "image"
   ],
+  "bin": {
+    "tinypng": "bin/index.js"
+  },
   "author": "nie.yuyao",
   "license": "MIT",
   "devDependencies": {
