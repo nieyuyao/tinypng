@@ -23,3 +23,5 @@ exports.downloadConfig = {
 };
 exports.imgReg = /.*\.(png|jpe?g)$/;
 exports.extReg = /\.(png|jpe?g)$/;
+exports.maxConnections = 10; // 最大连接数
+exports.reqeustDelay = 300; // 网络请求延迟时间ms

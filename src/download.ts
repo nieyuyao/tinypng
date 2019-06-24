@@ -1,4 +1,4 @@
-import { downloadConfig } from "./config";
+import { downloadConfig, reqeustDelay } from "./config";
 import { ServerResponse } from "http";
 const https = require("https");
 
@@ -19,8 +19,9 @@ const download = (
   return new Promise((resolve, reject) => {
     let buffer = Buffer.alloc(0);
     const config = Object.assign({}, downloadConfig);
-    config.path = `${location.substr(19)}/${filename}`;
-    const req = https.request(config, (res: ServerResponse) => {
+    config.path = encodeURI(`${location.substr(19)}/${filename}`);
+    setTimeout(() => {
+      const req = https.request(config, (res: ServerResponse) => {
       if (res.statusCode === 200) {
         res.on("data", (chunk: Buffer) => {
           buffer = Buffer.concat([buffer, chunk]);
@@ -32,23 +33,25 @@ const download = (
           });
         });
         res.on("err", () => {
-          console.log("res err");
           reject({
             download: false
           });
         });
       } else {
+        console.log(config.path);
+        console.log(res.statusCode);
         reject({
           download: false
         })
       }
-    });
-    req.end();
-    req.on("error", () => {
-      reject({
-        download: false
       });
-    });
+      req.end();
+      req.on("error", (err: any) => {
+        reject({
+          download: false
+        });
+      });
+    }, reqeustDelay);
   });
 };
 export default download;

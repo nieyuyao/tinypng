@@ -1,35 +1,54 @@
 #!/usr/bin/env node
 import upload from "./upload";
 import download from "./download";
-import { extReg, Result, Errors, imgReg } from "./config";
+import { extReg, Result, Errors, imgReg, maxConnections, Param } from "./config";
 const fs = require("fs");
 const path = require("path");
 const log = require('single-line-log').stdout;
 const readline = require('readline');
 const ctxPath = process.cwd();
 
-// 成功的个数， 失败的个数，详情
-let success: number = 0;
-let fail: number = 0;
-let total: number = 0;
-let files: Array<string>;
-let tasks: Array<Promise<any>>;
+let fail: number = 0; // 失败的个数
+let total: number = 0; // 总数
+let files: Array<string>; // 文件名数组
+let fi: number = 0; // 当前正在遍历第几个文件
+let tasks: Array<() => {}>;
 const results: Result = {};
 
 const argvs = process.argv;
 let outDir = ctxPath; // 输出路径
-if (argvs[2] && argvs[2] === "--outdir") {
-  if (argvs[3]) {
-    outDir = path.resolve(ctxPath, argvs[3]);
+let aFile: string;
+let params:Param = {};
+
+/**
+ * @description 获取命令行参数
+ */
+function getCommandParams(): void {
+  for (let i = 2; i < argvs.length; i+=2) {
+    const key = argvs[i];
+    const value = argvs[i + 1];
+    params[key] = value;
   }
+  // 输出目录
+  if (params['--outdir']) {
+    outDir = path.resolve(ctxPath, params['--outdir']);
+  }
+  // 需要读取的文件
+  let _files: Array<string>;
+  if (params['--single']) {
+    _files = [params['--single']]
+  } else {
+    _files = fs.readdirSync(ctxPath, {
+      withFileTypes: true
+    });
+  }
+  getFiles(_files);
 }
+
 /**
  *@description 读取目录下的文件
  */
-function getFiles(): void {
-  const _files = fs.readdirSync(ctxPath, {
-    withFileTypes: true
-  });
+function getFiles(_files: Array<string>): void {
   files = _files.filter((file: string) => {
     return imgReg.test(file);
   });
@@ -42,7 +61,7 @@ function getFiles(): void {
  */
 function getTasks(): void {
   tasks = files.map((filename: string) => {
-    return (async() => {
+    return async() => {
       try {
         const filePath = path.resolve(ctxPath, filename);
         const matches = filename.match(extReg);
@@ -68,15 +87,14 @@ function getTasks(): void {
           fs.mkdirSync(outDir);
         }
         fs.writeFileSync(`${outDir}/${filename}`, downloadResult.buffer);
-        success++;
-        log(`tinying...${Math.floor((success / total) * 100)}%\n`);
       } catch (err) {
         fail++;
         // 上传失败
         if (err.upload === false) {
           results[filename] = {
             status: 1,
-            errInfo: Errors[1]
+            errInfo: Errors[1],
+            statusCode: err.statusCode
           }
         } else if (err.download === false) {
           results[filename] = {
@@ -90,7 +108,7 @@ function getTasks(): void {
           }
         }
       }
-    })();
+    };
   });
 }
 
@@ -99,10 +117,21 @@ function getTasks(): void {
  */
 async function tiny(): Promise<void> {
   try {
-    await Promise.all(tasks);
-    console.log(`\u001b[32m\uD83D\uDE04 ${success}个 \uD83D\uDE30 \u001b[31m${total-success}个\u001b[0m`);
-    for (const filename in results) {
-      console.log(`\u001b[31m${filename} ${results[filename].errInfo}\u001b[0m`);
+    const end = Math.min.call(null, tasks.length - fi, maxConnections);
+    for (let i = 0; i < end; i++) {
+      log(`tinying...${Math.floor(((fi + 1)/ total) * 100)}%\n`);
+      await tasks[fi]();
+      fi++;
+    }
+    if (fi < total) {
+      await tiny();
+    } else {
+      // 打印结果
+      console.log(`\u001b[32m\uD83D\uDE04 ${total-fail}个 \uD83D\uDE30 \u001b[31m${fail}个\u001b[0m`);
+      // 打印错误信息
+      for (const filename in results) {
+        console.log(`\u001b[31m${filename}  ${results[filename].statusCode}  ${results[filename].errInfo}\u001b[0m`);
+      }
     }
   }
   catch(err) {
@@ -121,7 +150,7 @@ const rl = readline.createInterface({
 function question(): void {
   rl.question('\u001b[1m\u001b[31m确定要压缩该文件夹下的图片?\u001b[0m(\u001b[32myes/no\u001b[0m)', (awnser: string) => {
     if (awnser === '' || awnser === 'yes') {
-      getFiles();
+      getCommandParams();
       getTasks();
       tiny();
       rl.close();

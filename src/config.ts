@@ -12,7 +12,12 @@ export interface Result {
   [filename: string] : {
     status: number; // 0 图片读取失败 1 图片上传失败 2 图片下载失败 3 图片写入失败
     errInfo: string;
+    statusCode?: number;
   }
+}
+
+export interface Param {
+  [key: string]: string;
 }
 
 export const Errors = ['图片读取失败', '图片上传失败', '图片下载失败', '图片写入失败'];
@@ -41,3 +46,5 @@ export const downloadConfig: ReqConfig = {
 
 export const imgReg: RegExp = /.*\.(png|jpe?g)$/;
 export const extReg: RegExp = /\.(png|jpe?g)$/;
+export const maxConnections = 10; // 最大连接数
+export const reqeustDelay = 300; // 网络请求延迟时间ms

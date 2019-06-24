@@ -1,9 +1,10 @@
-import { uploadConfig, headersConfig } from "./config";
+import { uploadConfig, headersConfig, reqeustDelay } from "./config";
 import { IncomingMessage } from "http";
 const https = require("https");
 const fs = require("fs");
 
 interface PromiseValue {
+  statusCode?: number;
   upload: boolean;
   location?: string;
 }
@@ -29,7 +30,8 @@ const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
           });
         } else {
           reject({
-            upload: false
+            upload: false,
+            statusCode: res.statusCode
           })
         }
       });
@@ -38,10 +40,11 @@ const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
       req.end();
       req.on("error", (err: any) => {
         reject({
-          upload: false
+          upload: false,
+          statusCode: 10000
         });
       });
-    }, 100);
+    }, reqeustDelay);
   });
 };
 export default upload;

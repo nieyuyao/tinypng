@@ -25,7 +25,8 @@ var upload = function upload(filePath, ext) {
                     });
                 } else {
                     reject({
-                        upload: false
+                        upload: false,
+                        statusCode: res.statusCode
                     });
                 }
             });
@@ -34,10 +35,11 @@ var upload = function upload(filePath, ext) {
             req.end();
             req.on("error", function (err) {
                 reject({
-                    upload: false
+                    upload: false,
+                    statusCode: 10000
                 });
             });
-        }, 100);
+        }, config_1.reqeustDelay);
     });
 };
 exports["default"] = upload;

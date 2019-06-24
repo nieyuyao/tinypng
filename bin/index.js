@@ -91,27 +91,44 @@ var path = require("path");
 var log = require('single-line-log').stdout;
 var readline = require('readline');
 var ctxPath = process.cwd();
-// 成功的个数， 失败的个数，详情
-var success = 0;
-var fail = 0;
-var total = 0;
-var files;
+var fail = 0; // 失败的个数
+var total = 0; // 总数
+var files; // 文件名数组
+var fi = 0; // 当前正在遍历第几个文件
 var tasks;
 var results = {};
 var argvs = process.argv;
 var outDir = ctxPath; // 输出路径
-if (argvs[2] && argvs[2] === "--outdir") {
-    if (argvs[3]) {
-        outDir = path.resolve(ctxPath, argvs[3]);
+var aFile;
+var params = {};
+/**
+ * @description 获取命令行参数
+ */
+function getCommandParams() {
+    for (var i = 2; i < argvs.length; i += 2) {
+        var key = argvs[i];
+        var value = argvs[i + 1];
+        params[key] = value;
     }
+    // 输出目录
+    if (params['--outdir']) {
+        outDir = path.resolve(ctxPath, params['--outdir']);
+    }
+    // 需要读取的文件
+    var _files;
+    if (params['--single']) {
+        _files = [params['--single']];
+    } else {
+        _files = fs.readdirSync(ctxPath, {
+            withFileTypes: true
+        });
+    }
+    getFiles(_files);
 }
 /**
  *@description 读取目录下的文件
  */
-function getFiles() {
-    var _files = fs.readdirSync(ctxPath, {
-        withFileTypes: true
-    });
+function getFiles(_files) {
     files = _files.filter(function (file) {
         return config_1.imgReg.test(file);
     });
@@ -159,8 +176,6 @@ function getTasks() {
                                 fs.mkdirSync(outDir);
                             }
                             fs.writeFileSync(outDir + "/" + filename, downloadResult.buffer);
-                            success++;
-                            log("tinying..." + Math.floor(success / total * 100) + "%\n");
                             return [3 /*break*/, 4];
                         case 3:
                             err_1 = _a.sent();
@@ -169,7 +184,8 @@ function getTasks() {
                             if (err_1.upload === false) {
                                 results[filename] = {
                                     status: 1,
-                                    errInfo: config_1.Errors[1]
+                                    errInfo: config_1.Errors[1],
+                                    statusCode: err_1.statusCode
                                 };
                             } else if (err_1.download === false) {
                                 results[filename] = {
@@ -188,7 +204,7 @@ function getTasks() {
                     }
                 });
             });
-        }();
+        };
     });
 }
 /**
@@ -196,23 +212,45 @@ function getTasks() {
  */
 function tiny() {
     return __awaiter(this, void 0, void 0, function () {
-        var filename, err_2;
+        var end, i, filename, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2,, 3]);
-                    return [4 /*yield*/, Promise.all(tasks)];
+                    _a.trys.push([0, 8,, 9]);
+                    end = Math.min.call(null, tasks.length - fi, config_1.maxConnections);
+                    i = 0;
+                    _a.label = 1;
                 case 1:
-                    _a.sent();
-                    console.log("\x1B[32m\uD83D\uDE04 " + success + "\u4E2A \uD83D\uDE30 \x1B[31m" + (total - success) + "\u4E2A\x1B[0m");
-                    for (filename in results) {
-                        console.log("\x1B[31m" + filename + " " + results[filename].errInfo + "\x1B[0m");
-                    }
-                    return [3 /*break*/, 3];
+                    if (!(i < end)) return [3 /*break*/, 4];
+                    log("tinying..." + Math.floor((fi + 1) / total * 100) + "%\n");
+                    return [4 /*yield*/, tasks[fi]()];
                 case 2:
+                    _a.sent();
+                    fi++;
+                    _a.label = 3;
+                case 3:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 4:
+                    if (!(fi < total)) return [3 /*break*/, 6];
+                    return [4 /*yield*/, tiny()];
+                case 5:
+                    _a.sent();
+                    return [3 /*break*/, 7];
+                case 6:
+                    // 打印结果
+                    console.log("\x1B[32m\uD83D\uDE04 " + (total - fail) + "\u4E2A \uD83D\uDE30 \x1B[31m" + fail + "\u4E2A\x1B[0m");
+                    // 打印错误信息
+                    for (filename in results) {
+                        console.log("\x1B[31m" + filename + "  " + results[filename].statusCode + "  " + results[filename].errInfo + "\x1B[0m");
+                    }
+                    _a.label = 7;
+                case 7:
+                    return [3 /*break*/, 9];
+                case 8:
                     err_2 = _a.sent();
                     throw err_2;
-                case 3:
+                case 9:
                     return [2 /*return*/];
             }
         });
@@ -228,7 +266,7 @@ var rl = readline.createInterface({
 function question() {
     rl.question("\x1B[1m\x1B[31m\u786E\u5B9A\u8981\u538B\u7F29\u8BE5\u6587\u4EF6\u5939\u4E0B\u7684\u56FE\u7247?\x1B[0m(\x1B[32myes/no\x1B[0m)", function (awnser) {
         if (awnser === '' || awnser === 'yes') {
-            getFiles();
+            getCommandParams();
             getTasks();
             tiny();
             rl.close();
