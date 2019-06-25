@@ -221,8 +221,6 @@ function getTasks() {
                                     statusCode: 10003
                                 };
                             }
-                            console.log(err_1);
-                            process.exit(1);
                             return [3 /*break*/, 4];
                         case 4:
                             return [2 /*return*/];

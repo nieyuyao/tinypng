@@ -131,8 +131,6 @@ function getTasks(): void {
             statusCode: 10003
           }
         }
-        console.log(err);
-        process.exit(1);
       }
     };
   });
