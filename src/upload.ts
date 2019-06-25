@@ -7,6 +7,7 @@ interface PromiseValue {
   statusCode?: number;
   upload: boolean;
   location?: string;
+  before?: number;
 }
 
 /**
@@ -20,13 +21,15 @@ const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
     const headers = Object.assign({}, headersConfig);
     headers["content-type"] = `image/${ext}`;
     config.headers = headers;
+    const data = fs.readFileSync(filePath);
     setTimeout(() => {
       const req = https.request(config, (res: IncomingMessage) => {
         // 图片上传成功
         if (res.statusCode === 201) {
           resolve({
             upload: true,
-            location: res.headers.location
+            location: res.headers.location,
+            before: data.length
           });
         } else {
           reject({
@@ -35,7 +38,6 @@ const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
           })
         }
       });
-      const data = fs.readFileSync(filePath);
       req.write(data);
       req.end();
       req.on("error", (err: any) => {

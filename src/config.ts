@@ -8,11 +8,22 @@ interface ReqConfig {
   headers?: IncomingHttpHeaders;
 }
 
-export interface Result {
+// 错误详情
+export interface Error {
   [filename: string] : {
     status: number; // 0 图片读取失败 1 图片上传失败 2 图片下载失败 3 图片写入失败
     errInfo: string;
     statusCode?: number;
+  }
+}
+
+// 压缩结果详情
+export interface Result {
+  [filename: string] : {
+    status: number; // 5 成功
+    before: number; // 压缩前大小
+    after: number; // 压缩后大小
+    ratio: string; // 压缩比
   }
 }
 
@@ -46,6 +57,5 @@ export const downloadConfig: ReqConfig = {
 
 export const imgReg: RegExp = /.*\.(png|jpe?g)$/;
 export const extReg: RegExp = /\.(png|jpe?g)$/;
-export const maxConnections = 20; // 最大连接数
 export const uploadDelay = 2000; // 网络请求延迟时间ms
 export const downloadDelay = 300; // 网络请求延迟时间ms

@@ -86,6 +86,7 @@ exports.__esModule = true;
 var upload_1 = require("./upload");
 var download_1 = require("./download");
 var config_1 = require("./config");
+var print_1 = require("./print");
 var fs = require("fs");
 var path = require("path");
 var log = require('single-line-log').stdout;
@@ -94,13 +95,12 @@ var ctxPath = process.cwd();
 var fail = 0; // 失败的个数
 var total = 0; // 总数
 var files; // 文件名数组
-var fi = 0; // 当前正在遍历第几个文件
 var tasks;
-var results = {};
+var errors = {}; // 错误详情
+var results = {}; // 结果详情
 var argvs = process.argv;
 var outDir = ctxPath; // 输出路径
-var aFile;
-var params = {};
+var params = {}; // 参数列表
 /**
  * @description 获取命令行参数
  */
@@ -109,6 +109,13 @@ function getCommandParams() {
         var key = argvs[i];
         var value = argvs[i + 1];
         params[key] = value;
+    }
+    if (params.hasOwnProperty('--help')) {
+        console.log("tinypngs                                 \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0B\u6240\u6709\u56FE\u7247,\u8F93\u5165\u76EE\u5F55\u4E3A\u5F53\u524D\u76EE\u5F55\x1B[0m");
+        console.log("tinypngs --outdir test                   \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0B\u6240\u6709\u56FE\u7247,\u8F93\u5165\u76EE\u5F55\u4E3Atest\x1B[0m");
+        console.log("tinypngs --single test.png               \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0Btest.png\u56FE\u7247,\u8F93\u51FA\u76EE\u5F55\u4E3A\u5F53\u524D\u76EE\u5F55\x1B[0m");
+        console.log("tinypngs --outdir dist --single test.png \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0Btest.png\u56FE\u7247,\u8F93\u51FA\u76EE\u5F55\u4E3Adist\u76EE\u5F55\x1B[0m");
+        process.exit(1);
     }
     // 输出目录
     if (params['--outdir']) {
@@ -133,7 +140,10 @@ function getFiles(_files) {
         return config_1.imgReg.test(file);
     });
     total = files.length;
-    console.log("\x1B[32m\u5171" + files.length + "\u4E2A\u56FE\u7247\x1B[0m");
+    if (total === 0) {
+        console.log("\x1B[1m\x1B[31m\u672A\u53D1\u73B0\u56FE\u7247\x1B[0m");
+        process.exit(1);
+    }
 }
 /**
  * @description 创建任务
@@ -151,7 +161,7 @@ function getTasks() {
                             filePath = path.resolve(ctxPath, filename);
                             matches = filename.match(config_1.extReg);
                             if (matches === null) {
-                                results[filename] = {
+                                errors[filename] = {
                                     status: 0,
                                     errInfo: config_1.Errors[0]
                                 };
@@ -166,40 +176,53 @@ function getTasks() {
                                 fail++;
                                 return [2 /*return*/];
                             }
+                            if (!uploadResult.before) {
+                                fail++;
+                                return [2 /*return*/];
+                            }
                             return [4 /*yield*/, download_1["default"](location_1, filename)];
                         case 2:
                             downloadResult = _a.sent();
                             if (!downloadResult.buffer) {
                                 fail++;
+                                return [2 /*return*/];
                             }
                             if (!fs.existsSync(outDir)) {
                                 fs.mkdirSync(outDir);
                             }
                             fs.writeFileSync(outDir + "/" + filename, downloadResult.buffer);
+                            results[filename] = {
+                                status: 5,
+                                before: uploadResult.before,
+                                after: downloadResult.buffer.length,
+                                ratio: Math.floor(downloadResult.buffer.length / uploadResult.before * 100) + "%"
+                            };
                             return [3 /*break*/, 4];
                         case 3:
                             err_1 = _a.sent();
                             fail++;
                             // 上传失败
                             if (err_1.upload === false) {
-                                results[filename] = {
+                                errors[filename] = {
                                     status: 1,
                                     errInfo: config_1.Errors[1],
                                     statusCode: err_1.statusCode
                                 };
                             } else if (err_1.download === false) {
-                                results[filename] = {
+                                errors[filename] = {
                                     status: 2,
                                     errInfo: config_1.Errors[2],
                                     statusCode: err_1.statusCode
                                 };
                             } else {
-                                results[filename] = {
+                                errors[filename] = {
                                     status: 3,
                                     errInfo: config_1.Errors[3],
                                     statusCode: 10003
                                 };
                             }
+                            console.log(err_1);
+                            process.exit(1);
                             return [3 /*break*/, 4];
                         case 4:
                             return [2 /*return*/];
@@ -214,51 +237,34 @@ function getTasks() {
  */
 function tiny() {
     return __awaiter(this, void 0, void 0, function () {
-        var end, i, hasError, filename, err_2;
+        var i, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 8,, 9]);
-                    end = Math.min(tasks.length - fi, config_1.maxConnections);
+                    _a.trys.push([0, 5,, 6]);
                     i = 0;
                     _a.label = 1;
                 case 1:
-                    if (!(i < end)) return [3 /*break*/, 4];
-                    log("tinying..." + Math.floor((fi + 1) / total * 100) + "%\n");
-                    return [4 /*yield*/, tasks[fi]()];
+                    if (!(i < total)) return [3 /*break*/, 4];
+                    log("tinying..." + Math.floor((i + 1) / total * 100) + "%\n");
+                    return [4 /*yield*/, tasks[i]()];
                 case 2:
                     _a.sent();
-                    fi++;
                     _a.label = 3;
                 case 3:
                     i++;
                     return [3 /*break*/, 1];
                 case 4:
-                    if (!(fi < total)) return [3 /*break*/, 6];
-                    return [4 /*yield*/, tiny()];
-                case 5:
-                    _a.sent();
-                    return [3 /*break*/, 7];
-                case 6:
                     // 打印结果
                     console.log("\x1B[32m\uD83D\uDE04 " + (total - fail) + "\u4E2A \uD83D\uDE30 \x1B[31m" + fail + "\u4E2A\x1B[0m");
-                    hasError = false;
-                    for (filename in results) {
-                        if (!hasError) {
-                            hasError = true;
-                        }
-                        console.log("\x1B[31m" + filename + "  " + results[filename].statusCode + "  " + results[filename].errInfo + "\x1B[0m");
-                    }
-                    if (hasError) {
-                        console.log("\u8BF7\u4F7F\u7528 tinypngs --single \u56FE\u7247\u540D \u538B\u7F29\u5931\u8D25\u7684\u56FE\u7247");
-                    }
-                    _a.label = 7;
-                case 7:
-                    return [3 /*break*/, 9];
-                case 8:
+                    // 打印错误信息
+                    print_1.printError(errors);
+                    print_1.printResult(results);
+                    return [3 /*break*/, 6];
+                case 5:
                     err_2 = _a.sent();
                     throw err_2;
-                case 9:
+                case 6:
                     return [2 /*return*/];
             }
         });
@@ -272,9 +278,10 @@ var rl = readline.createInterface({
  * @description 提示是否要压缩
  */
 function question() {
+    getCommandParams();
     rl.question("\x1B[1m\x1B[31m\u786E\u5B9A\u8981\u538B\u7F29\u8BE5\u6587\u4EF6\u5939\u4E0B\u7684\u56FE\u7247?\x1B[0m(\x1B[32myes/no\x1B[0m)", function (awnser) {
         if (awnser === '' || awnser === 'yes') {
-            getCommandParams();
+            console.log("\x1B[32m\u5171" + files.length + "\u4E2A\u56FE\u7247\x1B[0m");
             getTasks();
             tiny();
             rl.close();

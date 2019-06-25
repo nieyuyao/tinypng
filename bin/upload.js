@@ -15,13 +15,15 @@ var upload = function upload(filePath, ext) {
         var headers = Object.assign({}, config_1.headersConfig);
         headers["content-type"] = "image/" + ext;
         config.headers = headers;
+        var data = fs.readFileSync(filePath);
         setTimeout(function () {
             var req = https.request(config, function (res) {
                 // 图片上传成功
                 if (res.statusCode === 201) {
                     resolve({
                         upload: true,
-                        location: res.headers.location
+                        location: res.headers.location,
+                        before: data.length
                     });
                 } else {
                     reject({
@@ -30,7 +32,6 @@ var upload = function upload(filePath, ext) {
                     });
                 }
             });
-            var data = fs.readFileSync(filePath);
             req.write(data);
             req.end();
             req.on("error", function (err) {
