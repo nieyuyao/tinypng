@@ -1,8 +1,9 @@
-import { downloadConfig, reqeustDelay } from "./config";
+import { downloadConfig, downloadDelay } from "./config";
 import { ServerResponse } from "http";
 const https = require("https");
 
 interface PromiseValue {
+  statusCode?: number;
   download: boolean;
   buffer?: Buffer;
 }
@@ -29,29 +30,31 @@ const download = (
         res.on("end", () => {
           resolve({
             download: true,
-            buffer
+            buffer,
+            statusCode: 200
           });
         });
         res.on("err", () => {
           reject({
-            download: false
+            download: false,
+            statusCode: 10001
           });
         });
       } else {
-        console.log(config.path);
-        console.log(res.statusCode);
         reject({
-          download: false
+          download: false,
+          statusCode: res.statusCode
         })
       }
       });
       req.end();
       req.on("error", (err: any) => {
         reject({
-          download: false
+          download: false,
+          statusCode: 10002
         });
       });
-    }, reqeustDelay);
+    }, downloadDelay);
   });
 };
 export default download;

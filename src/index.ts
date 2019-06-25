@@ -36,7 +36,7 @@ function getCommandParams(): void {
   // 需要读取的文件
   let _files: Array<string>;
   if (params['--single']) {
-    _files = [params['--single']]
+    _files = [params['--single']];
   } else {
     _files = fs.readdirSync(ctxPath, {
       withFileTypes: true
@@ -99,12 +99,14 @@ function getTasks(): void {
         } else if (err.download === false) {
           results[filename] = {
             status: 2,
-            errInfo: Errors[2]
+            errInfo: Errors[2],
+            statusCode: err.statusCode
           }
         } else {
           results[filename] = {
             status: 3,
-            errInfo: Errors[3]
+            errInfo: Errors[3],
+            statusCode: 10003
           }
         }
       }
@@ -117,7 +119,7 @@ function getTasks(): void {
  */
 async function tiny(): Promise<void> {
   try {
-    const end = Math.min.call(null, tasks.length - fi, maxConnections);
+    const end = Math.min(tasks.length - fi, maxConnections);
     for (let i = 0; i < end; i++) {
       log(`tinying...${Math.floor(((fi + 1)/ total) * 100)}%\n`);
       await tasks[fi]();
@@ -129,8 +131,15 @@ async function tiny(): Promise<void> {
       // 打印结果
       console.log(`\u001b[32m\uD83D\uDE04 ${total-fail}个 \uD83D\uDE30 \u001b[31m${fail}个\u001b[0m`);
       // 打印错误信息
+      let hasError: boolean = false;
       for (const filename in results) {
+        if (!hasError) {
+          hasError = true;
+        }
         console.log(`\u001b[31m${filename}  ${results[filename].statusCode}  ${results[filename].errInfo}\u001b[0m`);
+      }
+      if (hasError) {
+        console.log(`请使用 tinypngs --single 图片名 压缩失败的图片`);
       }
     }
   }

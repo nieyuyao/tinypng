@@ -24,7 +24,7 @@ export const Errors = ['图片读取失败', '图片上传失败', '图片下载
 
 export const headersConfig: IncomingHttpHeaders = {
   origin: "https://tinypng.com",
-  cookie: "_ga=GA1.2.348540694.1532179868; _gid=GA1.2.57501512.1560647966",
+  // cookie: "_ga=GA1.2.348540694.1532179868; _gid=GA1.2.57501512.1560647966",
   referer: "https://tinypng.com/",
   "user-agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
@@ -46,5 +46,6 @@ export const downloadConfig: ReqConfig = {
 
 export const imgReg: RegExp = /.*\.(png|jpe?g)$/;
 export const extReg: RegExp = /\.(png|jpe?g)$/;
-export const maxConnections = 10; // 最大连接数
-export const reqeustDelay = 300; // 网络请求延迟时间ms
+export const maxConnections = 20; // 最大连接数
+export const uploadDelay = 2000; // 网络请求延迟时间ms
+export const downloadDelay = 300; // 网络请求延迟时间ms

@@ -39,7 +39,7 @@ var upload = function upload(filePath, ext) {
                     statusCode: 10000
                 });
             });
-        }, config_1.reqeustDelay);
+        }, config_1.uploadDelay);
     });
 };
 exports["default"] = upload;

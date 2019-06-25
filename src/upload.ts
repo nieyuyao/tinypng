@@ -1,4 +1,4 @@
-import { uploadConfig, headersConfig, reqeustDelay } from "./config";
+import { uploadConfig, headersConfig, uploadDelay } from "./config";
 import { IncomingMessage } from "http";
 const https = require("https");
 const fs = require("fs");
@@ -44,7 +44,7 @@ const upload = (filePath: string, ext: string): Promise<PromiseValue> => {
           statusCode: 10000
         });
       });
-    }, reqeustDelay);
+    }, uploadDelay);
   });
 };
 export default upload;

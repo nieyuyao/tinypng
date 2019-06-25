@@ -190,12 +190,14 @@ function getTasks() {
                             } else if (err_1.download === false) {
                                 results[filename] = {
                                     status: 2,
-                                    errInfo: config_1.Errors[2]
+                                    errInfo: config_1.Errors[2],
+                                    statusCode: err_1.statusCode
                                 };
                             } else {
                                 results[filename] = {
                                     status: 3,
-                                    errInfo: config_1.Errors[3]
+                                    errInfo: config_1.Errors[3],
+                                    statusCode: 10003
                                 };
                             }
                             return [3 /*break*/, 4];
@@ -212,12 +214,12 @@ function getTasks() {
  */
 function tiny() {
     return __awaiter(this, void 0, void 0, function () {
-        var end, i, filename, err_2;
+        var end, i, hasError, filename, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8,, 9]);
-                    end = Math.min.call(null, tasks.length - fi, config_1.maxConnections);
+                    end = Math.min(tasks.length - fi, config_1.maxConnections);
                     i = 0;
                     _a.label = 1;
                 case 1:
@@ -240,9 +242,15 @@ function tiny() {
                 case 6:
                     // 打印结果
                     console.log("\x1B[32m\uD83D\uDE04 " + (total - fail) + "\u4E2A \uD83D\uDE30 \x1B[31m" + fail + "\u4E2A\x1B[0m");
-                    // 打印错误信息
+                    hasError = false;
                     for (filename in results) {
+                        if (!hasError) {
+                            hasError = true;
+                        }
                         console.log("\x1B[31m" + filename + "  " + results[filename].statusCode + "  " + results[filename].errInfo + "\x1B[0m");
+                    }
+                    if (hasError) {
+                        console.log("\u8BF7\u4F7F\u7528 tinypngs --single \u56FE\u7247\u540D \u538B\u7F29\u5931\u8D25\u7684\u56FE\u7247");
                     }
                     _a.label = 7;
                 case 7:

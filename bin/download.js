@@ -22,29 +22,31 @@ var download = function download(location, filename) {
                     res.on("end", function () {
                         resolve({
                             download: true,
-                            buffer: buffer
+                            buffer: buffer,
+                            statusCode: 200
                         });
                     });
                     res.on("err", function () {
                         reject({
-                            download: false
+                            download: false,
+                            statusCode: 10001
                         });
                     });
                 } else {
-                    console.log(config.path);
-                    console.log(res.statusCode);
                     reject({
-                        download: false
+                        download: false,
+                        statusCode: res.statusCode
                     });
                 }
             });
             req.end();
             req.on("error", function (err) {
                 reject({
-                    download: false
+                    download: false,
+                    statusCode: 10002
                 });
             });
-        }, config_1.reqeustDelay);
+        }, config_1.downloadDelay);
     });
 };
 exports["default"] = download;
