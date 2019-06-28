@@ -98,39 +98,64 @@ var files; // 文件名数组
 var tasks;
 var errors = {}; // 错误详情
 var results = {}; // 结果详情
+var isSingle = false;
 var argvs = process.argv;
 var outDir = ctxPath; // 输出路径
-var params = {}; // 参数列表
 /**
  * @description 获取命令行参数
  */
 function getCommandParams() {
-    for (var i = 2; i < argvs.length; i += 2) {
-        var key = argvs[i];
-        var value = argvs[i + 1];
-        params[key] = value;
-    }
-    if (params.hasOwnProperty('--help')) {
-        console.log("tinypngs                                 \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0B\u6240\u6709\u56FE\u7247,\u8F93\u5165\u76EE\u5F55\u4E3A\u5F53\u524D\u76EE\u5F55\x1B[0m");
-        console.log("tinypngs --outdir test                   \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0B\u6240\u6709\u56FE\u7247,\u8F93\u5165\u76EE\u5F55\u4E3Atest\x1B[0m");
-        console.log("tinypngs --single test.png               \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0Btest.png\u56FE\u7247,\u8F93\u51FA\u76EE\u5F55\u4E3A\u5F53\u524D\u76EE\u5F55\x1B[0m");
-        console.log("tinypngs --outdir dist --single test.png \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0Btest.png\u56FE\u7247,\u8F93\u51FA\u76EE\u5F55\u4E3Adist\u76EE\u5F55\x1B[0m");
+    if (argvs[2] === '--version') {
+        console.log(require('../package').version);
         process.exit(1);
     }
-    // 输出目录
-    if (params['--outdir']) {
-        outDir = path.resolve(ctxPath, params['--outdir']);
+    if (argvs[2] === '--help') {
+        print_1.printHelp();
+        process.exit(1);
     }
     // 需要读取的文件
     var _files;
-    if (params['--single']) {
-        _files = [params['--single']];
-    } else {
+    if (!argvs[2]) {
         _files = fs.readdirSync(ctxPath, {
             withFileTypes: true
         });
+        getFiles(_files);
     }
-    getFiles(_files);
+    ;
+    // 输出目录
+    if (argvs[2] === '--outdir') {
+        if (!argvs[3]) {
+            console.log("\x1B[31m\u8BF7\u6307\u5B9A\u8F93\u51FA\u76EE\u5F55\x1B[0m");
+            process.exit(1);
+        }
+        outDir = path.resolve(ctxPath, argvs[3]);
+        if (!argvs[4]) {
+            _files = fs.readdirSync(ctxPath, {
+                withFileTypes: true
+            });
+            getFiles(_files);
+            return;
+        }
+        if (argvs[4] === '--single' && argvs[5]) {
+            isSingle = true;
+            _files = [argvs[5]];
+            getFiles(_files);
+            return;
+        }
+        console.log('相似的命令是 tinypngs --outdir dist --single test.png');
+        process.exit(1);
+    } else if (argvs[2] === '--single') {
+        isSingle = true;
+        if (!argvs[3]) {
+            console.log("\x1B[31m\u8BF7\u6307\u5B9A\u8F93\u51FA\u6587\u4EF6\u540D\x1B[0m");
+            process.exit(1);
+        }
+        _files = [argvs[3]];
+        getFiles(_files);
+    }
+    console.log("\x1B[1m\x1B[31m\u6CA1\u6709\u76F8\u5173\u547D\u4EE4\x1B[0m");
+    print_1.printHelp();
+    process.exit(1);
 }
 /**
  *@description 读取目录下的文件
@@ -277,7 +302,7 @@ var rl = readline.createInterface({
  */
 function question() {
     getCommandParams();
-    rl.question("\x1B[1m\x1B[31m\u786E\u5B9A\u8981\u538B\u7F29\u8BE5\u6587\u4EF6\u5939\u4E0B\u7684\u56FE\u7247?\x1B[0m(\x1B[32myes/no\x1B[0m)", function (awnser) {
+    rl.question("\x1B[1m\x1B[31m\u786E\u5B9A\u8981\u538B\u7F29\u8BE5" + (isSingle ? '' : '文件夹下的') + "\u56FE\u7247?\x1B[0m(\x1B[32myes/no\x1B[0m)", function (awnser) {
         if (awnser === '' || awnser === 'yes') {
             console.log("\x1B[32m\u5171" + files.length + "\u4E2A\u56FE\u7247\x1B[0m");
             getTasks();

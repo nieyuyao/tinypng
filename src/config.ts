@@ -27,10 +27,6 @@ export interface Result {
   }
 }
 
-export interface Param {
-  [key: string]: string;
-}
-
 export const Errors = ['图片读取失败', '图片上传失败', '图片下载失败', '图片写入失败'];
 
 export const headersConfig: IncomingHttpHeaders = {

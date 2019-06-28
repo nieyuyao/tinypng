@@ -20,3 +20,10 @@ function printResult(results) {
     }
 }
 exports.printResult = printResult;
+function printHelp() {
+    console.log("tinypngs                                 \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0B\u6240\u6709\u56FE\u7247,\u8F93\u5165\u76EE\u5F55\u4E3A\u5F53\u524D\u76EE\u5F55\x1B[0m");
+    console.log("tinypngs --outdir test                   \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0B\u6240\u6709\u56FE\u7247,\u8F93\u5165\u76EE\u5F55\u4E3Atest\x1B[0m");
+    console.log("tinypngs --single test.png               \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0Btest.png\u56FE\u7247,\u8F93\u51FA\u76EE\u5F55\u4E3A\u5F53\u524D\u76EE\u5F55\x1B[0m");
+    console.log("tinypngs --outdir dist --single test.png \x1B[1m\x1B[31m\u538B\u7F29\u5F53\u524D\u76EE\u5F55\u4E0Btest.png\u56FE\u7247,\u8F93\u51FA\u76EE\u5F55\u4E3Adist\u76EE\u5F55\x1B[0m");
+}
+exports.printHelp = printHelp;

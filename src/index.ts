@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import upload from "./upload";
 import download from "./download";
-import { extReg, Error, Errors, imgReg, Param, Result } from "./config";
-import { printError, printResult } from './print';
+import { extReg, Error, Errors, imgReg, Result } from "./config";
+import { printError, printResult, printHelp } from './print';
 
 const fs = require("fs");
 const path = require("path");
@@ -16,41 +16,66 @@ let files: Array<string>; // 文件名数组
 let tasks: Array<() => {}>;
 const errors: Error = {}; // 错误详情
 const results: Result = {}; // 结果详情
+let isSingle: boolean = false;
 
 const argvs = process.argv;
 let outDir = ctxPath; // 输出路径
-let params:Param = {}; // 参数列表
 
 /**
  * @description 获取命令行参数
  */
 function getCommandParams(): void {
-  for (let i = 2; i < argvs.length; i+=2) {
-    const key = argvs[i];
-    const value = argvs[i + 1];
-    params[key] = value;
-  }
-  if (params.hasOwnProperty('--help')) {
-    console.log(`tinypngs                                 \u001b[1m\u001b[31m压缩当前目录下所有图片,输入目录为当前目录\u001b[0m`);
-    console.log(`tinypngs --outdir test                   \u001b[1m\u001b[31m压缩当前目录下所有图片,输入目录为test\u001b[0m`);
-    console.log(`tinypngs --single test.png               \u001b[1m\u001b[31m压缩当前目录下test.png图片,输出目录为当前目录\u001b[0m`);
-    console.log(`tinypngs --outdir dist --single test.png \u001b[1m\u001b[31m压缩当前目录下test.png图片,输出目录为dist目录\u001b[0m`);
+  if (argvs[2] === '--version') {
+    console.log(require('../package').version);
     process.exit(1);
   }
-  // 输出目录
-  if (params['--outdir']) {
-    outDir = path.resolve(ctxPath, params['--outdir']);
+  if (argvs[2] === '--help') {
+    printHelp();
+    process.exit(1);
   }
   // 需要读取的文件
   let _files: Array<string>;
-  if (params['--single']) {
-    _files = [params['--single']];
-  } else {
+  if (!argvs[2]) {
     _files = fs.readdirSync(ctxPath, {
       withFileTypes: true
     });
+    getFiles(_files);
+  };
+
+  // 输出目录
+  if (argvs[2] === '--outdir') {
+    if (!argvs[3]) {
+      console.log('\u001b[31m请指定输出目录\u001b[0m');
+      process.exit(1);
+    }
+    outDir = path.resolve(ctxPath, argvs[3]);
+    if (!argvs[4]) {
+      _files = fs.readdirSync(ctxPath, {
+        withFileTypes: true
+      });
+      getFiles(_files);
+      return;
+    }
+    if (argvs[4] === '--single' && argvs[5]) {
+      isSingle = true;
+      _files = [argvs[5]];
+      getFiles(_files);
+      return;
+    }
+    console.log('相似的命令是 tinypngs --outdir dist --single test.png');
+    process.exit(1);
+  } else if (argvs[2] === '--single') {
+    isSingle = true;
+    if (!argvs[3]) {
+      console.log('\u001b[31m请指定输出文件名\u001b[0m');
+      process.exit(1);
+    }
+    _files = [argvs[3]];
+    getFiles(_files);
   }
-  getFiles(_files);
+  console.log('\u001b[1m\u001b[31m没有相关命令\u001b[0m');
+  printHelp();
+  process.exit(1);
 }
 
 /**
@@ -62,7 +87,7 @@ function getFiles(_files: Array<string>): void {
   });
   total = files.length;
   if (total === 0) {
-    console.log(`\u001b[1m\u001b[31m未发现图片\u001b[0m`);
+    console.log('\u001b[1m\u001b[31m未发现图片\u001b[0m');
     process.exit(1);
   }
 }
@@ -166,7 +191,7 @@ const rl = readline.createInterface({
  */
 function question(): void {
   getCommandParams();
-  rl.question('\u001b[1m\u001b[31m确定要压缩该文件夹下的图片?\u001b[0m(\u001b[32myes/no\u001b[0m)', (awnser: string) => {
+  rl.question(`\u001b[1m\u001b[31m确定要压缩该${isSingle ? '' : '文件夹下的'}图片?\u001b[0m(\u001b[32myes/no\u001b[0m)`, (awnser: string) => {
     if (awnser === '' || awnser === 'yes') {
       console.log(`\u001b[32m共${files.length}个图片\u001b[0m`);
       getTasks();
@@ -181,6 +206,3 @@ function question(): void {
 }
 
 question();
-
-
-
