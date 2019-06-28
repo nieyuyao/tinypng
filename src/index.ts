@@ -40,6 +40,7 @@ function getCommandParams(): void {
       withFileTypes: true
     });
     getFiles(_files);
+    return;
   };
 
   // 输出目录
@@ -72,6 +73,7 @@ function getCommandParams(): void {
     }
     _files = [argvs[3]];
     getFiles(_files);
+    return;
   }
   console.log('\u001b[1m\u001b[31m没有相关命令\u001b[0m');
   printHelp();

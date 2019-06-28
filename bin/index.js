@@ -120,6 +120,7 @@ function getCommandParams() {
             withFileTypes: true
         });
         getFiles(_files);
+        return;
     }
     ;
     // 输出目录
@@ -152,6 +153,7 @@ function getCommandParams() {
         }
         _files = [argvs[3]];
         getFiles(_files);
+        return;
     }
     console.log("\x1B[1m\x1B[31m\u6CA1\u6709\u76F8\u5173\u547D\u4EE4\x1B[0m");
     print_1.printHelp();
