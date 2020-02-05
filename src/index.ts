@@ -169,7 +169,7 @@ function getTasks(): void {
 async function tiny(): Promise<void> {
   try {
     for (let i = 0; i < total; i++) {
-      log(`tinying...${Math.floor(((i + 1)/ total) * 100)}%\n`);
+      log(`tiny image ${(i + 1)} ...\n`);
       await tasks[i]();
     }
     // 打印结果
