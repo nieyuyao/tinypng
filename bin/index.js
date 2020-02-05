@@ -271,7 +271,7 @@ function tiny() {
                     _a.label = 1;
                 case 1:
                     if (!(i < total)) return [3 /*break*/, 4];
-                    log("tinying..." + Math.floor((i + 1) / total * 100) + "%\n");
+                    log("tiny image " + (i + 1) + " ...\n");
                     return [4 /*yield*/, tasks[i]()];
                 case 2:
                     _a.sent();
